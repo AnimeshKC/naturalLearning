@@ -15,12 +15,11 @@ def removeBetweenCharacters(a,b,data):
 def wordListToFreqDict(wordlist):
     wordfreq = [wordlist.count(p) for p in wordlist]
     firstDict = dict(zip(wordlist,wordfreq))
-    #the plan to make the key word filter 5 occurances
-    #right now, use 50 for simplicity
+    #the plan to make the key word filter 25 occurances
     
     filteredDict = {}
     for k,v in firstDict.items():
-        if v >= 50:
+        if v >=25:
             filteredDict[k] = v
     return filteredDict
 
@@ -75,7 +74,7 @@ def split_into_sentences(text):
 def getData(filename):
     with open(filename) as json_file:
         data = json.load(json_file)
-        rawData = []
+        textData = []
         wordList = []
         sentenceList = []
         for i in range(len(data)):
@@ -89,30 +88,34 @@ def getData(filename):
             sentences = split_into_sentences(clean)
             sentenceList.append(sentences)
             wordList.append(unpunctuated)
-            rawData.append(clean)
+            textData.append(clean)
 
         #print(sentenceList[0])
 
         mergedWordList = functools.reduce(operator.iconcat, wordList, [])
         #print(len(mergedWordList))
 
-        stopWords = ['a', 'the', 'and', 'at', 'an', 'all', 'again' 'above', 'for',
-                     'any', 'are', 'because', 'as', 'but', 'do', 'did', 'done', 'from',
-                     'had', 'has', 'having', 'of', 'in', 'to', 'on', 'exercises',
-                     'data','or', 'your', 'solutions', 'is', 'you', 'that', 'this' 'given',
-                     'section', 'be', 'can', 'four', 'each', 'use', 'top', 'student', 'sample', 'provided',
-                     'after', 'read', 'page', 'completed', 'complete', 'completing', 'with',
-                     'should', 'section', 'readings', 'question', 'this', 'given', 'pages',
-                     'will', 'reading','about', '\'', 'x', 'chapter', '(', ')',
+        stopWords = ['a', 'the', 'and', 'at', 'an', 'all', 'again' 'above', 'which', 'during', 'for',
+                     'any', 'are', 'called', 'lab', 'consider', 'solution', 'detailed', 'total', 'number', 'point', 'because', 'as', 'but', 'do', 'did', 'done', 'from', 'assignment', 'does', 'textbook', 'how', 
+                     'had', 'has', 'having', 'of', 'in', 'to', 'on', 'exercises', 'same', 'follows', 'moves', 'more', 'before',
+                     'data','or', 'also', 'your', 'different', 'ball', 'end', 'source', 'university', 'athabasca',
+                     'introductory', 'drag', 'he', 'phet', 'among', 'spss', 'need', 'explain', 'through',
+                     'following', 'along', 'example', 'explanation', 'there', ' following,', 'must', 'colorado', '$x$', '$f$', 'solutions', 'is', 'you', 'that', 'this' 'given', 'where', 'then', 'since', 'final', 
+                     'section', 'be', 'can', 'four', 'below', 'test', 'solve', 'figure', 'section', 'manual',
+                     'each', 'use', 'places', 'home', 'between', 'terms', 'if', 'when', 'one', 'female', 'who', 'optional', 'find', 'key',  'top', 'student', 'sample', 'provided', 'commentary', 'have', 'submit', 'write',
+                     'after', 'below', 'decimal', 'diagram', 'block', 'section', 'manual', 'objectives', 'keep', 'course', 'link', 'large', 'context', 'read', 'page', 'completed', 'complete', 'completing', 'with', 'computer', 'assigned',
+                     'whether', 'examples', 'were', 'working', 'introduction', 
+                     'should', 'shown', 'problems', 'problem', 'answer', 'answers', 'section', 'readings', 'question', 'this', 'given', 'pages', 'difference', 'see', 'have', 'such', 'only', 'used', 'model', 
+                     'will', 'first', 'other', 'would', 'learning', 'no', 'second', 'into', 'these', 'reading','about', '\'', 'x', 'chapter', '(', ')', '"),"', 'selected', 'than', 'students', 'new', 
                      'above', 'by', 'may', '-value', 'define', 'not', 'using', 'sections', 'page.', 'what', 'we', 'two', 'three',
-                     '=', 'b.', 'a.', 'c.', '1', '2', '3', '4', '5', '6',
-                     '7','8', '9', '0', '10',  'age', 'listed', 'below', 'section', 'exercise',
-                     'its', '.', 's', 'h', 'y', 'b', '1', 'per',
+                     '=', 'b.', 'a.', 'c.', '1', '2', '3', '4', '5', '6', 'make', 'answers',  
+                     '7','8', '9', '0', 'was', 'due', '10',  'age', 'listed', 'below', 'section', 'exercise',
+                     'its', '.', 's', 'h', 'y', 'b', '1', 'per', 
                      'below', 'manual', 'practice', 'it', 'able', 'our', 'work', 'unit', 'p', '2', ',']
         filteredWordList = []
         for w in mergedWordList:
             #removing trailing periods
-            if  w.lower() not in stopWords and len(w.lower())>1:
+            if  w.lower() not in stopWords and w.lower().isalpha() and len(w.lower())>1:
 
                 if w.lower()[-1] == '.':
                     if len(w.lower()[:-1]) >1:
@@ -134,7 +137,7 @@ def getData(filename):
         
 
         
-    return [rawData, mergedWordList, sentenceList, wordDict, finalList]
+    return [data, mergedWordList, sentenceList, wordDict, finalList]
 
     
 currentData = getData("dataArray.json")
@@ -230,19 +233,19 @@ def generateGraph(connectionsList):
     associationList = sorted(associationList, key=operator.itemgetter(2), reverse = True)
     #print (associationList[0:10])
     #print(maxCount)
-    refVal = maxCount +1
+    '''refVal = maxCount +1
     for i in range(len(associationList)):
         firstWord = associationList[i][0]
         secondWord = associationList[i][1]
         associationList[i][2] = refVal - associationList[i][2]
         weight = associationList[i][2]
-        g.add_edge(firstWord,secondWord, weight)
+        g.add_edge(firstWord,secondWord, weight)'''
     return associationList
     
 
 associationList = generateGraph(connectionsData)
 
-outputArray = [wordDictData, associationList]
+outputArray = [wordDictData, associationList, rawData]
 #print (outputArray)
 #print (associationList[0:100])
 
