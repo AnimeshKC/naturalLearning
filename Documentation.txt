@@ -1,0 +1,94 @@
+Simple Files:
+db folder:
+1. access.php
+2. install.xml
+3. upgrade.php
+
+1. Standard PHP code that outlines permissions.
+2. This file initiates the database when the plugin is installed. It is written in XML so that it can be read by various data management systems.
+The field names of the database are id and data_uuid, to store the courseID and a unique identification number respectively.
+3. Enables editing of the plugin's database, but requires a new version to be issued so that moodle can update. 
+
+lang/en folder:
+contains general strings that can be displayed by the plugin. Block can only be accessed from course pages by using the specialization function.
+
+block_natural_learning.php:
+simple file that links to view.php. It also checks whether a record in the database exists for the given course and whether the user is an admin,
+to permit the button for updating the data in the database. 
+
+view.php:
+The main file that extracts the data from moodle courses and gathers the data for the javascript visualization. The global variable $DB
+is called, from which all the database information is read. $courseid is called and is received from block_natural_learning.php. The plugin checks whether the user is logged
+in to moodle, and a simple query is performed to check whether any of the course files and moodle external links are the desired content. This code would differ depending on the type
+of files the data is stored on Moodle. Math 215 does it with external links, while Math 315 does it with internal files, which are more difficult to locate. Physics 200's file storage
+was more unusual. The files were not stored within moodle, and the course only linked one of the content files. Thus, by just querying the moodle database, it is not possible to 
+obtain all the course contents. Files of all the relevant content were downloaded and stored because there was no way to code all the information from the course by itself.
+It is unfortunate that the data for Physics had to be hard coded and stored from its source, 
+but there was no other way to extract this information from the course itself. In order to resolve this issue, the Physics content needs to be stored within moodle. 
+
+Files that store the course contents in external links follow the formatting of "complete.html" for complete course units.
+Alternatively, files that stored the content internally are read by using moodle data manipulation API. $DB->getrecords() looks at the files table in the moodle database and checks 
+for all file content associated with courses, and uses the course contextid to identify only files in the current course. 
+$urlArray appends all of these files as well. 
+
+The ExtractData function iterates through each URL, splits the URL into elements separated by "/", and looks at the last 3 elements. 
+The third and second last elements compose the filepath, which must be followed by a trailing delimiter.
+The last element represents the filename. 
+$fs is an object which can fetch files by loading the required parameters: $contextid, $component, $filearea, $itemid, $filepath, $filename
+$contextid is the main variable required. $Coursecontext is the variable passed into the Extract Data function, and it obtains the context id
+by calling the instance of context_course with the corresponding $courseid of the particular course. 
+The file is received with the passed parameters and the contents are pushed into the dataArray. 
+$courseFile creates the special character formatting of the course name and generates a file to store the current data. 
+UpdateState is a variable passed from block_natural_learning.php. When the user clicks on "generate" from the block menu, an updateState of 0 is obtained,
+to signify that if there is already data on the database for this course, it will be reused. An updateState of 1 means that the current extracted data will be
+again passed to the python program to generate the new node information. The code checks whether a record exists in the database, and if updateState is 1,
+the record will be modified with the new information. Only admins have access to the update button, so that for users, the process of generating the visualization
+is faster since the data already exists in the database. The data is only changed if an admin requests it be updated with the new information. 
+
+Regex is used to create arrays that store certain forms of data. For example, the paragraph array extracts all text found in the <p> tags of the course data,
+while the table array extracts all <table> tags. $result contains all the data obtained from the python program. The connections array is a list of arrays of 
+3 elements. Index 0 and 1 are words, and index 2 represents the number of connections between them throughout the course. The array is organized from highest to
+lowest distances, so index 2 of the first array provides the $maxDist variable and index2 of the last array provides the $minDist variable. 
+
+appendData is a function that finds all instances of a word in the pargraph and tableMath arrays, and for each word, generates an array that is to be 
+appended to an array called $contentArray. 
+
+Then, html code stores the necessary data into an output array that it sends to main.js to carry out the visualization.
+
+parseData.py:
+
+The python program that finds the relationships between words. removeBetweenCharacters is a simple function that uses regex to remove everything between and
+including the 2 characters inputted. This is used to strip the html coding so that for the sake of finding 3 words, only the words themselves are factored. 
+wordListtoFreqDict converts the word array into a dictionary that counts the number of occurances for each word. 
+sortFreqDict sorts the dictionary into a list from key words that are most to least frequent. 
+split_into_sentences is a function that checks for several formatting cases to split the data into sentences, so that connections can be found between sentences.
+
+the main function getData opens the file with the contents of the course, cleans the html formatting, and if the array that was inputted consisted of
+several arrays, it is merged into a single list with operator.iconcat. stopWords is a list of common words that should not count as key words.
+This is done in general by including frequent trivial words such as "a", "the", "and". All the words in mergedWordList are checked to ensure they are not trivial
+words, are alphanumeric, and are not 1 character long. Trailing periods are also removed from the words. the finalList, declared as the connectionsData is a list
+of key words and their locations in the course Data. generateGraph iterates through the entire finalList and matches all the location connections between 
+all key word pairs, sorting them from strongest to weakest in connection. 
+
+Finally, the python code outputs an array of words and their frequencies, an array of the connection between words, and also the rawData
+for reading from the database. 
+
+main.js:
+This code takes care of the visualization of the nodes, using d3 javascript libraries.
+wordArray is an object that stores frequency, the name of the word, the paragraphs associated with the word, and its tables.
+linkArray reads the connectionsArray and simply creates weights based on the number of connections between each word pair. 
+scaleWeight is a function that generates link strengths for each pair of words. A link strength of 0.1 is the most related two words can be,
+and a link strength of 1 is the least related they can be. This is scaled based on the number of connections between the words relative to the minimum
+and maximum number of connections between words in the given course data. 
+
+canvas is used to produce the visualization and the majority of the remaining course simply fills out the parameters needed to display the nodes. 
+simulation.force sets properties of the simulation, such as where the center node will be located and how the nodes interact when colliding. 
+simulation.distance sets the distances between the nodes, and simulation.strength sets the link strength between the nodes, which determines 
+how the nodes will react in response to a node being moved. 
+
+A div tooltip is created so that it can display the contents of each node. Drag functions are implemented to enable nodes to be dragged around.
+update is a function constantly called by the visualization to display the nodes after each movement. 
+The mousemove function is used to check whether the mouse scrolls to a particular node. The mousemove function 
+cannot detect whether it is exactly pointing to a node, but it can check and make sure that the mouse is very close to a node. If it is very close to 2 nodes,
+mousemove will select the closer node. From this, the paragraph and table data of the node is stored into the div and printed out in text. The div is
+scrollable and adjusts its position close to the node in question, so that the node will remain visible. 
