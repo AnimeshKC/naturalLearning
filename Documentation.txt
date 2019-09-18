@@ -1,3 +1,6 @@
+This project was done for my Athabasca University workterm.
+It takes data from a moodle course and finds connections between the information present in the course to create nodes of related data that can be inspected to see what information is present. PHP and MYSQL are the server side. Javascript is the client side. AJAX is used to communicate between the server and client sides. JSON is used to call Python from PHP in order to more easily extract the data information.
+
 Simple Files:
 db folder:
 1. access.php
@@ -53,7 +56,7 @@ lowest distances, so index 2 of the first array provides the $maxDist variable a
 appendData is a function that finds all instances of a word in the pargraph and tableMath arrays, and for each word, generates an array that is to be 
 appended to an array called $contentArray. 
 
-Then, html code stores the necessary data into an output array that it sends to main.js to carry out the visualization.
+AJAX html code stores the necessary data into an output array that it sends to main.js to carry out the visualization.
 
 parseData.py:
 
