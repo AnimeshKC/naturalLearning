@@ -1,5 +1,8 @@
 This project was done for my Athabasca University workterm.
-It takes data from a moodle course and finds connections between the information present in the course to create nodes of related data that can be inspected to see what information is present. PHP and MYSQL are the server side. Javascript is the client side. AJAX is used to communicate between the server and client sides. JSON is used to call Python from PHP in order to more easily extract the data information.
+It takes data from a moodle course and creates a node visualization of the relationships between information.
+PHP and MYSQL are the server side. Javascript is the client side. 
+AJAX is used to communicate between the server and client sides. 
+JSON is used to call Python from PHP in order to more easily extract the data information.
 
 Simple Files:
 db folder:
