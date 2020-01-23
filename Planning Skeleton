@@ -1,0 +1,7 @@
+Server Side --> PHP, mySQL
+
+Client Side --> JavaScript, AJAX
+
+Communication between Server Side and Client Side --> JSON
+
+Sometimes we will use PHP to call Python programs
